@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NepausPost — Prototype</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --primary:#D62828; /* red */
+      --secondary:#003049; /* dark blue */
+      --accent:#F77F00; /* orange */
+      --neutral-1:#F4F4F4;
+      --neutral-2:#EDEDED;
+      --max-width:1200px;
+      --header-height:76px;
+    }
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Arial,sans-serif;margin:0;color:#111;background:#fff;line-height:1.5}
+    a{color:inherit;text-decoration:none}
+
+    /* Top bar */
+    .topbar{background:#0f1724;color:#fff;font-size:13px;padding:6px 16px}
+    .topbar .inner{max-width:var(--max-width);margin:0 auto;display:flex;justify-content:space-between;align-items:center}
+
+    /* Header */
+    header{position:sticky;top:0;z-index:999;background:#fff;box-shadow:0 2px 6px rgba(10,10,10,0.06)}
+    .main-header{max-width:var(--max-width);margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;height:var(--header-height)}
+    .logo{display:flex;align-items:center;gap:12px}
+    .logo img{height:44px}
+    .site-title{font-family:Poppins,Inter;font-weight:700;color:var(--secondary);font-size:20px}
+
+    /* Nav */
+    nav.primary{display:flex;gap:20px;align-items:center}
+    nav.primary a{padding:8px 6px;color:#333;font-weight:600}
+    nav.primary a:hover{color:var(--primary)}
+
+    /* Right tools */
+    .tools{display:flex;gap:12px;align-items:center}
+    .search{position:relative}
+    .search input{padding:8px 10px;border-radius:20px;border:1px solid #ddd;width:180px;transition:width .25s}
+    .search input:focus{width:260px;outline:none;border-color:var(--primary)}
+    .icon-btn{background:#f5f5f5;padding:8px;border-radius:8px;cursor:pointer}
+
+    /* Layout */
+    .container{max-width:var(--max-width);margin:26px auto;padding:0 16px;display:grid;grid-template-columns:1fr 320px;gap:28px}
+
+    /* Hero */
+    .hero{display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start}
+    .slider{position:relative;border-radius:8px;overflow:hidden}
+    .slide{display:none;padding:18px;background:linear-gradient(rgba(0,0,0,0.15),rgba(0,0,0,0.15));color:#fff}
+    .slide img{width:100%;height:320px;object-fit:cover;display:block;filter:brightness(.65)}
+    .slide .caption{position:absolute;left:24px;bottom:24px;max-width:60%}
+    .slide.active{display:block}
+    .trending{background:#fff;border-radius:8px;padding:12px}
+    .trending h4{margin:0 0 8px 0}
+    .trending li{padding:8px 0;border-bottom:1px dashed #eee;font-size:14px}
+
+    /* Category blocks */
+    .categories{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:22px}
+    .category-card{background:#fff;border-radius:8px;padding:12px;border:1px solid #f0f0f0}
+    .card-top{display:flex;gap:12px}
+    .card-top img{width:130px;height:86px;object-fit:cover;border-radius:6px}
+    .card-top .meta{flex:1}
+    .category-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .category-title a{font-size:13px;color:var(--primary);font-weight:700}
+
+    /* Latest grid */
+    .latest{margin-top:22px}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .card{background:#fff;border-radius:8px;overflow:hidden;border:1px solid #f0f0f0}
+    .card img{width:100%;height:160px;object-fit:cover}
+    .card .body{padding:12px}
+    .card .cat{font-size:12px;color:var(--primary);font-weight:700}
+    .card h3{font-size:16px;margin:8px 0}
+    .card p{font-size:14px;color:#555;margin:0}
+
+    /* Sidebar */
+    .sidebar .widget{background:#fff;padding:12px;border-radius:8px;border:1px solid #f0f0f0;margin-bottom:16px}
+    .newsletter input{width:100%;padding:10px;margin-top:8px;border-radius:6px;border:1px solid #ddd}
+    .popular li{display:flex;gap:8px;padding:8px 0}
+    .popular img{width:56px;height:40px;object-fit:cover;border-radius:6px}
+
+    /* Footer */
+    footer{background:#0b1220;color:#fff;padding:32px 16px;margin-top:40px}
+    .footer-inner{max-width:var(--max-width);margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:20px}
+    .footer-inner h4{margin-top:0}
+    .bottom-footer{max-width:var(--max-width);margin:12px auto;color:#cfd6df;padding:12px 16px;display:flex;justify-content:space-between;font-size:13px}
+
+    /* Single column on small screens */
+    @media (max-width:980px){
+      .container{grid-template-columns:1fr;}
+      .hero{grid-template-columns:1fr;}
+      .categories{grid-template-columns:1fr}
+      .grid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:600px){
+      .grid{grid-template-columns:1fr}
+      .main-header{padding:10px}
+      nav.primary{display:none}
+      .search input{width:120px}
+      .logo img{height:36px}
+    }
+
+    /* Mobile menu overlay */
+    .mobile-menu{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999}
+    .mobile-menu .drawer{width:280px;background:#fff;height:100%;padding:16px}
+    .mobile-menu.open{display:block}
+    .drawer .close{display:block;margin-bottom:10px}
+
+    /* small helpers */
+    .muted{color:#666;font-size:13px}
+    .btn{display:inline-block;padding:10px 14px;border-radius:8px;background:var(--primary);color:#fff;font-weight:700}
+
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="inner">
+      <div>Thursday, December 11, 2025</div>
+      <div>Follow: Facebook · Instagram · YouTube · TikTok</div>
+    </div>
+  </div>
+
+  <header>
+    <div class="main-header">
+      <div class="logo">
+        <img src="https://via.placeholder.com/120x44?text=NP" alt="NepausPost logo">
+        <div class="site-title">NepausPost</div>
+      </div>
+
+      <nav class="primary" aria-label="Main navigation">
+        <a href="#">Home</a>
+        <a href="#">Nepal News</a>
+        <a href="#">Australia News</a>
+        <a href="#">Sports</a>
+        <a href="#">Politics</a>
+        <a href="#">Entertainment</a>
+        <a href="#">Opinion</a>
+        <a href="#">Trending</a>
+      </nav>
+
+      <div class="tools">
+        <div class="search"><input placeholder="Search..." aria-label="Search"></div>
+        <div class="icon-btn" id="mobile-menu-btn">☰</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="drawer">
+      <a class="close" href="#" id="mobileMenuClose">Close ✕</a>
+      <nav>
+        <a href="#">Home</a><br>
+        <a href="#">Nepal News</a><br>
+        <a href="#">Australia News</a><br>
+        <a href="#">Sports</a><br>
+        <a href="#">Politics</a><br>
+        <a href="#">Entertainment</a><br>
+        <a href="#">Opinion</a><br>
+      </nav>
+    </div>
+  </div>
+
+  <main class="container">
+    <section>
+      <div class="hero">
+        <div class="slider" id="slider">
+          <div class="slide active">
+            <img src="https://picsum.photos/1200/600?random=10" alt="hero">
+            <div class="caption">
+              <div style="background:var(--primary);display:inline-block;padding:6px 10px;border-radius:6px;font-weight:700">Nepal News</div>
+              <h2 style="margin:12px 0 8px">Major headline goes here — top breaking news</h2>
+              <p class="muted">Short summary of the top story that hooks the reader in one or two lines.</p>
+            </div>
+          </div>
+
+          <div class="slide">
+            <img src="https://picsum.photos/1200/600?random=11" alt="hero2">
+            <div class="caption">
+              <div style="background:var(--accent);display:inline-block;padding:6px 10px;border-radius:6px;font-weight:700">Sports</div>
+              <h2 style="margin:12px 0 8px">Big sports result — live updates</h2>
+              <p class="muted">Small summary that quickly describes the story.</p>
+            </div>
+          </div>
+
+          <div style="position:absolute;right:12px;top:12px;z-index:3">
+            <button id="prev" class="icon-btn">‹</button>
+            <button id="next" class="icon-btn">›</button>
+          </div>
+        </div>
+
+        <aside class="trending">
+          <h4>Trending Now</h4>
+          <ul>
+            <li>Headline 1 — Quick note</li>
+            <li>Headline 2 — Quick note</li>
+            <li>Headline 3 — Quick note</li>
+            <li>Headline 4 — Quick note</li>
+            <li>Headline 5 — Quick note</li>
+          </ul>
+        </aside>
+      </div>
+
+      <!-- Categories -->
+      <div class="categories">
+        <div class="category-card">
+          <div class="category-title"><strong>Nepal News</strong><a href="#">View All ➜</a></div>
+          <div class="card-top">
+            <img src="https://picsum.photos/300/200?random=21" alt="">
+            <div class="meta">
+              <h3 style="margin:0 0 6px">Top Nepal story title</h3>
+              <p class="muted">A short blurb about the top Nepali news to attract a click.</p>
+              <div style="margin-top:8px;display:flex;gap:8px"><span class="btn">Read</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-card">
+          <div class="category-title"><strong>Australia News</strong><a href="#">View All ➜</a></div>
+          <div class="card-top">
+            <img src="https://picsum.photos/300/200?random=22" alt="">
+            <div class="meta">
+              <h3 style="margin:0 0 6px">Top Australia headline</h3>
+              <p class="muted">Short summary about the story relevant to Nepali audience in Australia.</p>
+              <div style="margin-top:8px;display:flex;gap:8px"><span class="btn">Read</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-card">
+          <div class="category-title"><strong>Sports</strong><a href="#">View All ➜</a></div>
+          <div class="card-top">
+            <img src="https://picsum.photos/300/200?random=23" alt="">
+            <div class="meta">
+              <h3 style="margin:0 0 6px">Sports highlight</h3>
+              <p class="muted">Short blurb.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="category-card">
+          <div class="category-title"><strong>Entertainment</strong><a href="#">View All ➜</a></div>
+          <div class="card-top">
+            <img src="https://picsum.photos/300/200?random=24" alt="">
+            <div class="meta">
+              <h3 style="margin:0 0 6px">Entertainment story</h3>
+              <p class="muted">Short blurb.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Latest -->
+      <div class="latest">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3>Latest News</h3><div class="muted">Showing latest articles • <a href="#">Load more</a></div></div>
+        <div class="grid">
+          <!-- 9 sample cards -->
+          <article class="card"><img src="https://picsum.photos/600/400?random=31" alt=""><div class="body"><div class="cat">World</div><h3>Global headline preview</h3><p class="muted">Quick summary about the story and what readers should know.</p></div></article>
+          <article class="card"><img src="https://picsum.photos/600/400?random=32" alt=""><div class="body"><div class="cat">Nepal</div><h3>Nepal headline preview</h3><p class="muted">Quick summary about the story.</p></div></article>
+          <article class="card"><img src="https://picsum.photos/600/400?random=33" alt=""><div class="body"><div class="cat">Sports</div><h3>Sports headline</h3><p class="muted">Short summary.</p></div></article>
+
+          <article class="card"><img src="https://picsum.photos/600/400?random=34" alt=""><div class="body"><div class="cat">Politics</div><h3>Politics update</h3><p class="muted">Short summary.</p></div></article>
+          <article class="card"><img src="https://picsum.photos/600/400?random=35" alt=""><div class="body"><div class="cat">Entertainment</div><h3>Entertainment news</h3><p class="muted">Short summary.</p></div></article>
+          <article class="card"><img src="https://picsum.photos/600/400?random=36" alt=""><div class="body"><div class="cat">Australia</div><h3>Australia news</h3><p class="muted">Short summary.</p></div></article>
+
+          <article class="card"><img src="https://picsum.photos/600/400?random=37" alt=""><div class="body"><div class="cat">Opinion</div><h3>Opinion piece</h3><p class="muted">Short summary.</p></div></article>
+          <article class="card"><img src="https://picsum.photos/600/400?random=38" alt=""><div class="body"><div class="cat">Tech</div><h3>Tech news</h3><p class="muted">Short summary.</p></div></article>
+          <article class="card"><img src="https://picsum.photos/600/400?random=39" alt=""><div class="body"><div class="cat">Business</div><h3>Business headline</h3><p class="muted">Short summary.</p></div></article>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Right sidebar -->
+    <aside class="sidebar">
+      <div class="widget newsletter">
+        <h4>Newsletter</h4>
+        <p class="muted">Get regular news updates in your inbox.</p>
+        <input placeholder="Your email address">
+        <div style="margin-top:8px"><button class="btn">Subscribe</button></div>
+      </div>
+
+      <div class="widget popular">
+        <h4>Popular (7 days)</h4>
+        <ul style="list-style:none;padding:0;margin:0">
+          <li><img src="https://picsum.photos/80/60?random=41" alt=""><div style="display:inline-block;vertical-align:top;margin-left:8px;width:220px"><strong>Popular headline one</strong><div class="muted">2h ago</div></div></li>
+          <li><img src="https://picsum.photos/80/60?random=42" alt=""><div style="display:inline-block;vertical-align:top;margin-left:8px;width:220px"><strong>Popular headline two</strong><div class="muted">5h ago</div></div></li>
+          <li><img src="https://picsum.photos/80/60?random=43" alt=""><div style="display:inline-block;vertical-align:top;margin-left:8px;width:220px"><strong>Popular headline three</strong><div class="muted">1d ago</div></div></li>
+        </ul>
+      </div>
+
+      <div class="widget">
+        <h4>Weather</h4>
+        <p class="muted">Kathmandu: 23°C • Sydney: 18°C</p>
+      </div>
+
+      <div class="widget">
+        <h4>Advertisement</h4>
+        <div style="background:#f0f0f0;height:250px;display:flex;align-items:center;justify-content:center;color:#777">300 x 250 Ad</div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>
+        <img src="https://via.placeholder.com/110x44?text=NP" alt="logo"><p class="muted" style="max-width:300px">NepausPost is a community news portal for Nepalis in Nepal and Australia — prototype layout.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul class="muted" style="list-style:none;padding:0;margin:0"><li>Home</li><li>Nepal News</li><li>Australia News</li><li>Contact</li></ul>
+      </div>
+      <div>
+        <h4>Trending</h4>
+        <div class="muted">#election #cricket #immigration</div>
+      </div>
+      <div>
+        <h4>Follow</h4>
+        <div class="muted">Facebook · Instagram · YouTube</div>
+      </div>
+    </div>
+    <div class="bottom-footer"> <div>© 2025 NepausPost.com – All Rights Reserved</div><div><a href="#" style="color:#cfd6df">Privacy</a> · <a href="#" style="color:#cfd6df">Terms</a></div></div>
+  </footer>
+
+  <script>
+    // Simple slider logic
+    (function(){
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      let idx = 0;
+      const show = i => {
+        slides.forEach(s=>s.classList.remove('active'));
+        slides[i].classList.add('active');
+      }
+      document.getElementById('next').addEventListener('click',()=>{ idx = (idx+1)%slides.length; show(idx); });
+      document.getElementById('prev').addEventListener('click',()=>{ idx = (idx-1+slides.length)%slides.length; show(idx); });
+      // auto advance
+      setInterval(()=>{ idx = (idx+1)%slides.length; show(idx); },6000);
+
+      // Mobile menu
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileClose = document.getElementById('mobileMenuClose');
+      mobileBtn.addEventListener('click', ()=> mobileMenu.classList.add('open'));
+      mobileClose.addEventListener('click', (e)=>{ e.preventDefault(); mobileMenu.classList.remove('open') });
+    })();
+  </script>
+</body>
+</html>
